@@ -1,6 +1,37 @@
 <resources>
     <string name="app_name">Virtual Deck</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_decks">Decks</string>
+    <string name="title_profile">Profile</string>
+    <string name="title_cards">Cards</string>
+    <string name="title_create_card">Create Card</string>
+    <string name="create_card">Create Card</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_card_button">Create Card</string>
+    <string name="image_of_card">Image of card</string>
+    <string name="create_card_activity_page">Create Card Activity Page</string>
+    <string name="create_card_card_name">Card Name</string>
+    <string name="create_card_card_game_name">Card Game</string>
+    <string name="create_card_card_game_collection">Card Game Collection</string>
+    <string name="create_card_card_description">Card Description</string>
+    <string name="create_card_card_print_series">Print Series</string>
+    <string name="create_card_card_extra_info">Extra Information</string>
+    <string name="upload_card_image_button">Upload Card Image</string>
+    <string name="view_card_activity_page">View Card Activity Page</string>
+    <string name="edit_card_button">Edit Card</string>
+    <string name="save_card_button">Save Card</string>
+    <string name="edit_card_activity_page">Edit Card Activity Page</string>
+    <string name="delete_card_button">Delete Card</string>
+    <string name="layout_deck_list_name">Deck Name</string>
+    <string name="layout_card_list_name">Card Name</string>
+    <string name="create_deck">Create Deck</string>
+    <string name="create_deck_button">Save Deck</string>
+    <string name="create_deck_deck_name">Deck Name</string>
+    <string name="edit_deck_button">Edit Deck</string>
+    <string name="delete_deck_button">Delete Deck</string>
+    <string name="save_deck_button">Save Deck</string>
+    <string name="deck_name">Deck Name</string>
+    <string name="user_profile_bio">Bio</string>
+    <string name="edit_profile_button">Edit Profile</string>
 </resources>
