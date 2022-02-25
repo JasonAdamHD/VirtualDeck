@@ -1,5 +1,6 @@
 package com.example.virtualdeck;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,7 +21,15 @@ import com.example.virtualdeck.helpers.GlobalConstants;
 import com.example.virtualdeck.helpers.SQLiteDatabaseHelper;
 import com.example.virtualdeck.objects.Card;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ViewDeckCardsActivity extends AppCompatActivity {
 
@@ -61,7 +70,31 @@ public class ViewDeckCardsActivity extends AppCompatActivity {
     private void deleteDeck(View view) {
         SQLiteDatabaseHelper db = new SQLiteDatabaseHelper(this);
         db.deleteDeck(deckUUID);
-        // TODO: DO PHP DELETE DECK
+
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient();
+
+            FormBody formBody = new FormBody.Builder()
+                    .add("DeckUUID", deckUUID)
+                    .add("UserUUID", GlobalConstants.USERUUID)
+                    .add("token", GlobalConstants.TOKEN)
+                    .build();
+
+            Request request = new Request.Builder().url(GlobalConstants.DELETE_DECK_URL).post(formBody).build();
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    e.printStackTrace();
+                }
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if(response.isSuccessful()){
+                    }
+                }
+            });
+        } catch (Exception exception) {
+            Toast.makeText(this, exception.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 
         finish();
     }

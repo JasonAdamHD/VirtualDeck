@@ -34,4 +34,5 @@
     <string name="deck_name">Deck Name</string>
     <string name="user_profile_bio">Bio</string>
     <string name="edit_profile_button">Edit Profile</string>
+    <string name="layout_friend_list_name">Friend Name</string>
 </resources>

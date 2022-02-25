@@ -63,7 +63,7 @@ public class CardsFragment extends Fragment {
     private void initImagesLists() {
         // TODO: Grab all of a USERUUID's cards from local db
         SQLiteDatabaseHelper dbHelper = new SQLiteDatabaseHelper(getContext());
-        dbHelper.getAllSQLiteCards(GlobalConstants.USER.getUserUUID(), mCardUUIDs, mCardNames);
+        dbHelper.getAllSQLiteCards(GlobalConstants.USERUUID, mCardUUIDs, mCardNames);
 
         initRecyclerView();
     }

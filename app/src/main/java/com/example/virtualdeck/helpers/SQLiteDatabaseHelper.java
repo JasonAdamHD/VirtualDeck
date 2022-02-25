@@ -1,19 +1,14 @@
 package com.example.virtualdeck.helpers;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.provider.MediaStore;
-import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.example.virtualdeck.objects.Card;
@@ -99,18 +94,19 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     public Card getCardByCardUUID(String cardUUID) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + CARD_TABLE + " WHERE CARDUUID = ?;", new String[] { cardUUID });
-        cursor.moveToFirst();
-        String cardJson = cursor.getString(2);
-        Card card = new Gson().fromJson(cardJson, Card.class);
-
-        return card;
+        if(cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            String cardJson = cursor.getString(2);
+            Card card = new Gson().fromJson(cardJson, Card.class);
+            return card;
+        }
+        return null;
     }
 
-    public void updateCard(Card card, String cardName, Bitmap cardBitmap) {
+    public boolean updateCard(String cardJSON, String cardUUID, String cardName, Bitmap cardBitmap) {
 
         //Update Local DB
         ContentValues values = new ContentValues();
-        String cardJSON = new Gson().toJson(card);
         values.put(CARD_TABLE_COL3, cardJSON);
         values.put(CARD_TABLE_COL4, cardName);
         ByteArrayOutputStream stream = null;
@@ -120,8 +116,9 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         String whereClause = "CARDUUID = ?";
-        String[] whereArgs = { card.getCardUUID() };
+        String[] whereArgs = { cardUUID };
         int result = db.update(CARD_TABLE, values, whereClause, whereArgs);
+        return result > 0;
     }
 
     public void deleteCard(String cardUUID) {
@@ -142,7 +139,9 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
         cardUUIDs = new Gson().fromJson(cardListJSON, ArrayList.class);
         
         cardUUIDs.forEach(cardUUID -> {
-            deck.add(getCardByCardUUID(cardUUID));
+            Card card = getCardByCardUUID(cardUUID);
+            if(card != null)
+                deck.add(card);
         });
         
         return deck;
@@ -197,7 +196,7 @@ public class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void updateDeck(String cardUUIDArrayListJSON, String deckName, String deckUUID) {
-
+        // TODO: FIX ISSUE WHERE DELETED CARDS ARE REMOVED FROM THE DECK!
         //Update Local DB
         ContentValues values = new ContentValues();
         values.put(DECK_TABLE_COL3, cardUUIDArrayListJSON);

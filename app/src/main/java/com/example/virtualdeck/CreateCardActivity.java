@@ -24,6 +24,7 @@ import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadNotificationConfig;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.UUID;
 
 import com.example.virtualdeck.helpers.GlobalConstants;
@@ -33,14 +34,22 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 
-public class CreateCardActivity extends AppCompatActivity {
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class CreateCardActivity extends AppCompatActivity{
 
     private ImageView card_image_view;
     private EditText name, game, collection, desc, series, info;
     private Uri filePath;
     private SQLiteDatabaseHelper localDatabase;
-    // TODO: REMOVE THESE TWO
-    private final String USER_UUID = GlobalConstants.USER.getUserUUID();
 
     private final String CARD_UUID = UUID.randomUUID().toString();
     private static final int STORAGE_PERMISSION_CODE = 100;
@@ -79,7 +88,8 @@ public class CreateCardActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == STORAGE_PERMISSION_CODE) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == STORAGE_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Permission granted", Toast.LENGTH_LONG).show();
             } else {
@@ -127,7 +137,7 @@ public class CreateCardActivity extends AppCompatActivity {
     private void uploadImage(){
         if(filePath == null)
         {
-            Toast.makeText(this, "Please select and image for the card.", Toast.LENGTH_LONG);
+            Toast.makeText(this, "Please select and image for the card.", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -143,7 +153,7 @@ public class CreateCardActivity extends AppCompatActivity {
         String json = new Gson().toJson(card);
 
         String path = getPath(filePath);
-
+        String extension = path.substring(path.lastIndexOf("."));
 
         // Store to local db
         localDatabase = new SQLiteDatabaseHelper(this);
@@ -159,17 +169,34 @@ public class CreateCardActivity extends AppCompatActivity {
             Toast.makeText(this, exception.toString(), Toast.LENGTH_LONG).show();
         }
 
-        if (localDatabase.insertCard(USER_UUID, CARD_UUID, json, card.getCardName(), stream.toByteArray())) {
+        if (localDatabase.insertCard(GlobalConstants.USERUUID, CARD_UUID, json, card.getCardName(), stream.toByteArray())) {
             // Upload to server db
             try {
-                new MultipartUploadRequest(this, CARD_UUID, GlobalConstants.UPLOAD_URL)
-                        .addFileToUpload(path, "image")
-                        .addParameter("UserUUID", USER_UUID)
-                        .addParameter("CardUUID", CARD_UUID)
-                        .addParameter("CardJSON", json)
-                        .setNotificationConfig(new UploadNotificationConfig())
-                        .setMaxRetries(1)
-                        .startUpload(); // Starting the upload
+                OkHttpClient okHttpClient = new OkHttpClient();
+
+                RequestBody formBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                        .addFormDataPart("image", CARD_UUID, RequestBody.create(new File(path), MediaType.parse("image")))
+                        .addFormDataPart("extension", extension)
+                        .addFormDataPart("UserUUID", GlobalConstants.USERUUID)
+                        .addFormDataPart("CardUUID", CARD_UUID)
+                        .addFormDataPart("CardJSON", json)
+                        .addFormDataPart("token", GlobalConstants.TOKEN)
+                        .build();
+
+                Request request = new Request.Builder().url(GlobalConstants.UPLOAD_CARD_URL).post(formBody).build();
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if(response.isSuccessful()){
+                        }
+                    }
+                });
+                Toast.makeText(this, "Uploading Card", Toast.LENGTH_SHORT).show();
 
             } catch (Exception exception) {
                 Toast.makeText(this, exception.getMessage(), Toast.LENGTH_SHORT).show();

@@ -1,5 +1,6 @@
 package com.example.virtualdeck;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,9 +19,21 @@ import com.example.virtualdeck.helpers.GlobalConstants;
 import com.example.virtualdeck.helpers.SQLiteDatabaseHelper;
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class CreateDeckActivity extends AppCompatActivity {
 
@@ -53,11 +66,34 @@ public class CreateDeckActivity extends AppCompatActivity {
         });
         String json = new Gson().toJson(cardUUIDArrayList);
 
-        if(localDatabase.insertDeck(GlobalConstants.USER.getUserUUID(), DECK_UUID, json, deckName.getText().toString().trim())) {
+        if(localDatabase.insertDeck(GlobalConstants.USERUUID, DECK_UUID, json, deckName.getText().toString().trim())) {
             try {
-                // TODO: SAVE THE DECK TO THE ONLINE DB
-            }
-            catch (Exception exception) {
+                OkHttpClient okHttpClient = new OkHttpClient();
+
+                FormBody formBody = new FormBody.Builder()
+                        .add("DeckUUID", DECK_UUID)
+                        .add("UserUUID", GlobalConstants.USERUUID)
+                        .add("CardUUIDListJSON", json)
+                        .add("DeckName", deckName.getText().toString().trim())
+                        .add("token", GlobalConstants.TOKEN)
+                        .build();
+
+                Request request = new Request.Builder().url(GlobalConstants.UPLOAD_DECK_URL).post(formBody).build();
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if(response.isSuccessful()){
+                        }
+                    }
+                });
+                Toast.makeText(this, "Uploading Card", Toast.LENGTH_SHORT).show();
+
+            } catch (Exception exception) {
                 Toast.makeText(this, exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
@@ -69,7 +105,7 @@ public class CreateDeckActivity extends AppCompatActivity {
 
     private void initImagesLists() {
         SQLiteDatabaseHelper dbHelper = new SQLiteDatabaseHelper(this);
-        dbHelper.getAllSQLiteCards(GlobalConstants.USER.getUserUUID(), mCardUUIDs, mCardNames);
+        dbHelper.getAllSQLiteCards(GlobalConstants.USERUUID, mCardUUIDs, mCardNames);
 
         initRecyclerView();
     }

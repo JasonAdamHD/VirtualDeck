@@ -31,8 +31,18 @@ import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadNotificationConfig;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class EditCardActivity extends AppCompatActivity {
 
@@ -45,7 +55,6 @@ public class EditCardActivity extends AppCompatActivity {
     private static final int STORAGE_PERMISSION_CODE = 100;
     //private static final int REQUEST_CODE_IMAGE_PICKER = 101;
     private static final int PICK_IMAGE_REQUEST = 102;
-    private final String TEST_USER_UUID = GlobalConstants.USER.getUserUUID();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,20 +91,7 @@ public class EditCardActivity extends AppCompatActivity {
     }
 
     private void onClick(View view) {
-        SQLiteDatabaseHelper dbHelper = new SQLiteDatabaseHelper(this);
-        //uploadImage();
-        //TODO: grab bitmap and place it in the update card function
-        String s_name = name.getText().toString().trim();
-        String s_game = game.getText().toString().trim();
-        String s_collection = collection.getText().toString().trim();
-        String s_desc = desc.getText().toString().trim();
-        String s_series = series.getText().toString().trim();
-        String s_info = info.getText().toString().trim();
-
-        Card card = new Card(new Card.CardMetadata(s_game, s_collection, s_desc, s_series, s_info), s_name, null, CARD_UUID);
-
-        card_image_view.buildDrawingCache();
-        dbHelper.updateCard(card, s_name, card_image_view.getDrawingCache());
+        uploadCard();
         finish();
     }
 
@@ -136,8 +132,8 @@ public class EditCardActivity extends AppCompatActivity {
         return path;
     }
 
-    private void uploadImage(){
-        // TODO: FIX THIS!!! THIS IS FOR THE ONLINE DB AND NEEDS TO
+    private void uploadCard(){
+        // TODO: Workaround that needs to be fixed. Need a way to not have to select the same card to save it.
         if(filePath == null)
         {
             Toast.makeText(this, "Please select and image for the card.", Toast.LENGTH_LONG).show();
@@ -156,7 +152,7 @@ public class EditCardActivity extends AppCompatActivity {
         String json = new Gson().toJson(card);
 
         String path = getPath(filePath);
-
+        String extension = path.substring(path.lastIndexOf("."));
 
         // Store to local db
         localDatabase = new SQLiteDatabaseHelper(this);
@@ -172,17 +168,35 @@ public class EditCardActivity extends AppCompatActivity {
             Toast.makeText(this, exception.toString(), Toast.LENGTH_LONG).show();
         }
 
-        if (localDatabase.insertCard(TEST_USER_UUID, CARD_UUID, json, card.getCardName(), stream.toByteArray())) {
+        card_image_view.buildDrawingCache();
+        if (localDatabase.updateCard(json, card.getCardUUID(), card.getCardName(), card_image_view.getDrawingCache())) {
             // Upload to server db
             try {
-                new MultipartUploadRequest(this, CARD_UUID, GlobalConstants.UPLOAD_URL)
-                        .addFileToUpload(path, "image")
-                        .addParameter("UserUUID", TEST_USER_UUID)
-                        .addParameter("CardUUID", CARD_UUID)
-                        .addParameter("CardJSON", json)
-                        .setNotificationConfig(new UploadNotificationConfig())
-                        .setMaxRetries(1)
-                        .startUpload(); // Starting the upload
+                OkHttpClient okHttpClient = new OkHttpClient();
+
+                RequestBody formBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                        .addFormDataPart("image", CARD_UUID, RequestBody.create(new File(path), MediaType.parse("image")))
+                        .addFormDataPart("extension", extension)
+                        .addFormDataPart("UserUUID", GlobalConstants.USERUUID)
+                        .addFormDataPart("CardUUID", CARD_UUID)
+                        .addFormDataPart("CardJSON", json)
+                        .addFormDataPart("token", GlobalConstants.TOKEN)
+                        .build();
+
+                Request request = new Request.Builder().url(GlobalConstants.UPDATE_CARD_URL).post(formBody).build();
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if(response.isSuccessful()){
+                        }
+                    }
+                });
+                Toast.makeText(this, "Uploading Card", Toast.LENGTH_SHORT).show();
 
             } catch (Exception exception) {
                 Toast.makeText(this, exception.getMessage(), Toast.LENGTH_SHORT).show();

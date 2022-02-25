@@ -1,5 +1,6 @@
 package com.example.virtualdeck;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -15,13 +16,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.virtualdeck.helpers.GlobalConstants;
 import com.example.virtualdeck.helpers.SQLiteDatabaseHelper;
 import com.example.virtualdeck.objects.Card;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class ViewCardActivity extends AppCompatActivity {
 
@@ -99,8 +112,30 @@ public class ViewCardActivity extends AppCompatActivity {
         SQLiteDatabaseHelper db = new SQLiteDatabaseHelper(this);
         db.deleteCard(cardUUID);
         // Do PHP API call to delete card on the server
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient();
 
+            FormBody formBody = new FormBody.Builder()
+                    .add("CardUUID", cardUUID)
+                    .add("UserUUID", GlobalConstants.USERUUID)
+                    .add("token", GlobalConstants.TOKEN)
+                    .build();
 
+            Request request = new Request.Builder().url(GlobalConstants.DELETE_CARD_URL).post(formBody).build();
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    e.printStackTrace();
+                }
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if(response.isSuccessful()){
+                    }
+                }
+            });
+        } catch (Exception exception) {
+            Toast.makeText(this, exception.getMessage(), Toast.LENGTH_SHORT).show();
+        }
         finish();
     }
 

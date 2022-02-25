@@ -13,7 +13,11 @@
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_create_deck.xml" value="0.15729166666666666" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_edit_card.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_edit_deck_cards.xml" value="0.20104166666666667" />
+        <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_find_username.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_friend_list.xml" value="0.33695652173913043" />
+        <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_google_login.xml" value="0.223731884057971" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_main.xml" value="0.22" />
+        <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_select_username.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_view_card.xml" value="0.3663949275362319" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/activity_view_deck_cards.xml" value="0.35190217391304346" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/fragment_card_creation.xml" value="0.36666666666666664" />
@@ -26,6 +30,7 @@
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/fragment_profile.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/layout_card_list_item.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/layout_deck_list_item.xml" value="0.35190217391304346" />
+        <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/layout_friend_list_item.xml" value="0.33695652173913043" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/layout/layout_listitem.xml" value="0.19635416666666666" />
         <entry key="..\:/Users/jason/Desktop/VirtualDeck/app/src/main/res/menu/bottom_nav_menu.xml" value="0.22" />
       </map>

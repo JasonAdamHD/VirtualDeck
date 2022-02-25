@@ -59,7 +59,7 @@ public class DecksFragment extends Fragment {
 
     private void initRecyclerView() {
         SQLiteDatabaseHelper dbHelper = new SQLiteDatabaseHelper(getContext());
-        dbHelper.getAllSQLiteDecks(GlobalConstants.USER.getUserUUID(), mDeckNames, mDeckUUIDs);
+        dbHelper.getAllSQLiteDecks(GlobalConstants.USERUUID, mDeckNames, mDeckUUIDs);
 
         RecyclerView recyclerView = binding.getRoot().findViewById(R.id.deck_list_recycler_view);
         DeckListRecyclerViewAdapter adapter = new DeckListRecyclerViewAdapter(getContext(), mDeckNames, mDeckUUIDs, true);
