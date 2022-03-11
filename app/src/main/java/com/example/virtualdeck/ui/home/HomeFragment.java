@@ -16,9 +16,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.virtualdeck.CreateCardTradeActivity;
 import com.example.virtualdeck.FindUsernameActivity;
 import com.example.virtualdeck.FriendListActivity;
 import com.example.virtualdeck.R;
+import com.example.virtualdeck.ViewCardTradesListActivity;
 import com.example.virtualdeck.databinding.FragmentHomeBinding;
 import com.example.virtualdeck.helpers.DeckListRecyclerViewAdapter;
 import com.example.virtualdeck.helpers.FriendListRecyclerViewAdapter;
@@ -31,7 +33,7 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
     private FragmentHomeBinding binding;
-    private Button find_user_activity_button, view_followed_users_button;
+    private Button find_user_activity_button, view_followed_users_button, create_card_trade_button, find_card_trade_button;
     private ArrayList<String> mFriendUsernames = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -56,7 +58,23 @@ public class HomeFragment extends Fragment {
         view_followed_users_button = binding.viewFollowedUsersButton;
         view_followed_users_button.setOnClickListener(this::viewFollowedUsers);
 
+        create_card_trade_button = binding.createTradeActivityButton;
+        create_card_trade_button.setOnClickListener(this::createCardTrade);
+        
+        find_card_trade_button = binding.findTradeActivityButton;
+        find_card_trade_button.setOnClickListener(this::findCardTrade);
+        
         return root;
+    }
+
+    private void findCardTrade(View view) {
+        Intent intent = new Intent(getContext(), ViewCardTradesListActivity.class);
+        startActivity(intent);
+    }
+
+    private void createCardTrade(View view) {
+        Intent intent = new Intent(getContext(), CreateCardTradeActivity.class);
+        startActivity(intent);
     }
 
     private void viewFollowedUsers(View view) {

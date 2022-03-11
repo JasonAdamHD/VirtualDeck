@@ -1,12 +1,9 @@
 package com.example.virtualdeck.helpers;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.provider.MediaStore;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,55 +14,45 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.virtualdeck.CreateCardActivity;
 import com.example.virtualdeck.R;
 import com.example.virtualdeck.ViewCardActivity;
 import com.example.virtualdeck.objects.Card;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 
-import retrofit2.HttpException;
-
-public class CardListRecyclerViewAdapter extends RecyclerView.Adapter<CardListRecyclerViewAdapter.ViewHolder> {
+public class CardTradeCardListRecyclerViewAdapter extends RecyclerView.Adapter<CardTradeCardListRecyclerViewAdapter.ViewHolder> {
 
     private static final int ACTION_OPEN_DOCUMENT_CODE = 103;
+    private HashMap<String, Boolean> mSelectedMap;
     private ArrayList<String> mCardNames;
     private ArrayList<String> mCardUUIDs;
     private Context mContext;
     private boolean mIsLocal;
-    private boolean mCanEditCards;
 
-    public CardListRecyclerViewAdapter(Context context, ArrayList<String> mCardNames, ArrayList<String> mCardUUIDs, boolean mIsLocal, boolean mCanEditCards) {
+    public CardTradeCardListRecyclerViewAdapter(Context context, ArrayList<String> mCardNames, ArrayList<String> mCardUUIDs, boolean mIsLocal, HashMap<String, Boolean> mSelectedMap) {
         this.mContext = context;
         this.mCardNames = mCardNames;
         this.mCardUUIDs = mCardUUIDs;
         this.mIsLocal = mIsLocal;
-        this.mCanEditCards = mCanEditCards;
+        this.mSelectedMap = mSelectedMap;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CardTradeCardListRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_card_list_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+        CardTradeCardListRecyclerViewAdapter.ViewHolder holder = new CardTradeCardListRecyclerViewAdapter.ViewHolder(view);
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CardTradeCardListRecyclerViewAdapter.ViewHolder holder, int position) {
         if (mIsLocal) {
             SQLiteDatabaseHelper dbHelper = new SQLiteDatabaseHelper(mContext);
 
@@ -90,50 +77,18 @@ public class CardListRecyclerViewAdapter extends RecyclerView.Adapter<CardListRe
     }
 
     private void onClick(View view) {
-        Intent intent = new Intent(mContext, ViewCardActivity.class);
         TextView cardUUID = view.findViewById(R.id.card_uuid_list_item);
-        Toast.makeText(mContext, cardUUID.getText().toString(), Toast.LENGTH_LONG).show();
-        SQLiteDatabaseHelper dbHelper = new SQLiteDatabaseHelper(mContext);
-        Card card = null;
-        Bitmap bitmap = null;
-        if(mIsLocal) {
-            card = dbHelper.getCardByCardUUID(cardUUID.getText().toString());
-            try{
-                bitmap = dbHelper.getCardBitmap(card.getCardUUID());
-                String filePath = tempFileImage(mContext, bitmap,"name");
-                intent.putExtra("CardBitmapPath", filePath);
-            } catch (Exception exception) {
-                // TODO: Add some kind of message here
-                exception.printStackTrace();
-            }
+        String sCardUUID = cardUUID.getText().toString();
+
+        if (mSelectedMap.get(sCardUUID) == null && mSelectedMap.size() == 0) {
+            mSelectedMap.put(sCardUUID, true);
+            view.setBackgroundColor(Color.LTGRAY);
         }
         else{
-            // TODO: Do the online db call here to create the card the user is about to view.
+            mSelectedMap.remove(sCardUUID);
+            view.setBackgroundColor(Color.TRANSPARENT);
         }
-
-        intent.putExtra("CanEdit", mCanEditCards);
-        intent.putExtra("Card", card);
-        intent.putExtra("CardMetadata", card.getMetadata());
-        mContext.startActivity(intent);
     }
-    public static String tempFileImage(Context context, Bitmap bitmap, String name) {
-
-        File outputDir = context.getCacheDir();
-        File imageFile = new File(outputDir, name + ".jpg");
-
-        OutputStream os;
-        try {
-            os = new FileOutputStream(imageFile);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
-            os.flush();
-            os.close();
-        } catch (Exception e) {
-            Log.e(context.getClass().getSimpleName(), "Error writing file", e);
-        }
-
-        return imageFile.getAbsolutePath();
-    }
-
 
     @Override
     public int getItemCount() {

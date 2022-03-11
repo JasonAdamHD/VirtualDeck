@@ -17,8 +17,10 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.virtualdeck.databinding.ActivityMainBinding;
+import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -57,6 +59,15 @@ public class MainActivity extends AppCompatActivity {
 
         GlobalConstants.TOKEN = getSharedPreferences(GlobalConstants.SHARED_PREFS, MODE_PRIVATE).getString("TOKEN", "");
         GlobalConstants.USERUUID = getSharedPreferences(GlobalConstants.SHARED_PREFS, MODE_PRIVATE).getString("USERUUID", "");
+
+        // TODO asoidnasoidnoasindoiasndoiansodinasoid
+        String tempListStr = getSharedPreferences(GlobalConstants.SHARED_PREFS, MODE_PRIVATE).getString("FRIENDSLISTJSON", "");
+        Gson g = new Gson();
+        ArrayList<String> result = g.fromJson(tempListStr, ArrayList.class);
+        if (result == null) {
+            result = new ArrayList<>();
+        }
+        GlobalConstants.mFriendUserUUIDs = result;
 
         Toast.makeText(this, GlobalConstants.TOKEN, Toast.LENGTH_SHORT).show();
 

@@ -14,6 +14,21 @@
         android:theme="@style/Theme.VirtualDeck"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ViewCardTradesListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewCardTradeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CreateCardTradeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewUserCardsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewUserProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".FriendListActivity"
             android:exported="false" />
         <activity

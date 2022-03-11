@@ -26,4 +26,10 @@ public class FriendListActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initRecyclerView();
+    }
 }

@@ -2,6 +2,7 @@ package com.example.virtualdeck;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -43,8 +44,14 @@ public class FindUsernameActivity extends AppCompatActivity {
 
     private void followUser(View view) {
         // FIXME: Replace the global constant with the db version once the backend is rewritten!!
-        if (userProfile != null && !GlobalConstants.mFriendUserUUIDs.contains(userProfile.UserUUID))
+        if (userProfile != null && !GlobalConstants.mFriendUserUUIDs.contains(userProfile.UserUUID)) {
             GlobalConstants.mFriendUserUUIDs.add(userProfile.UserUUID);
+            String json = new Gson().toJson(GlobalConstants.mFriendUserUUIDs);
+            SharedPreferences sharedPreferences = getSharedPreferences(GlobalConstants.SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("FRIENDSLISTJSON", json);
+            editor.apply();
+        }
     }
 
     private void onClick(View view) {

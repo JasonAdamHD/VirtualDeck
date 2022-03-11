@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,10 +14,23 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.example.virtualdeck.FindUsernameActivity;
+import com.example.virtualdeck.MainActivity;
 import com.example.virtualdeck.R;
 import com.example.virtualdeck.databinding.FragmentProfileBinding;
+import com.example.virtualdeck.helpers.GlobalConstants;
+import com.google.gson.Gson;
+
+import java.io.IOException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ProfileFragment extends Fragment {
 
@@ -25,6 +39,7 @@ public class ProfileFragment extends Fragment {
     private TextView profileBio;
     private CircleImageView profileImage;
     private Button editProfileButton;
+    private ProfileFragment.UserProfile userProfile;
 
     private ProfileViewModel profileViewModel;
     private FragmentProfileBinding binding;
@@ -44,14 +59,46 @@ public class ProfileFragment extends Fragment {
         profileImage = binding.profileImage;
         editProfileButton = binding.profileEditProfileButton;
 
-        profileUsername.setText("@" + "ExampleUsername");
-        profileRealName.setText("FName" + " " + "LName");
-        profileBio.setText("No Bio Set");
+
+        getProfile();
+
         editProfileButton.setOnClickListener(this::onClick);
 
         return root;
     }
 
+    private void getProfile()
+    {
+        OkHttpClient okHttpClient = new OkHttpClient();
+
+        HttpUrl.Builder httpBuilder = HttpUrl.parse(GlobalConstants.GET_USERUUID_URL).newBuilder();
+        httpBuilder.addQueryParameter("UserUUID", GlobalConstants.USERUUID);
+        Request request = new Request.Builder().url(httpBuilder.build()).get().build();
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                call.cancel();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                final String myResponse = response.body().string();
+
+                Gson g = new Gson();
+                userProfile = g.fromJson(myResponse, ProfileFragment.UserProfile.class);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        profileUsername.setText("@" + userProfile.Username);
+                        profileRealName.setText(userProfile.DisplayName);
+                        Glide.with(getActivity()).load(userProfile.PhotoURL).into(profileImage);
+                    }
+                });
+            }
+        });
+    }
     private void onClick(View view) {
         // TODO: CREATE EDIT PROFILE PAGE
     }
@@ -60,5 +107,12 @@ public class ProfileFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private class UserProfile {
+        String DisplayName;
+        String PhotoURL;
+        String UserUUID;
+        String Username;
     }
 }
