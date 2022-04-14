@@ -3,20 +3,22 @@ package com.example.virtualdeck;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.virtualdeck.helpers.CardListRecyclerViewAdapter;
-import com.example.virtualdeck.helpers.DeckCardListRecyclerViewAdapter;
-import com.example.virtualdeck.helpers.DeckListRecyclerViewAdapter;
 import com.example.virtualdeck.helpers.GlobalConstants;
 import com.example.virtualdeck.helpers.SQLiteDatabaseHelper;
 import com.example.virtualdeck.objects.Card;
@@ -39,6 +41,7 @@ public class ViewDeckCardsActivity extends AppCompatActivity {
     private String deckUUID;
     private Button editDeckButton, deleteDeckButton;
     private TextView deckName;
+    private CardListRecyclerViewAdapter adapter;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -63,7 +66,6 @@ public class ViewDeckCardsActivity extends AppCompatActivity {
         Intent intent = new Intent(this, EditDeckCardsActivity.class);
         intent.putExtra("DeckUUID", deckUUID);
         intent.putExtra("DeckName", deckName.getText().toString());
-        //intent.putExtra("DeckName", );
         startActivity(intent);
     }
 
@@ -115,7 +117,7 @@ public class ViewDeckCardsActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
         RecyclerView recyclerView = findViewById(R.id.card_list_recycler_view);
-        CardListRecyclerViewAdapter adapter = new CardListRecyclerViewAdapter(this, mCardNames, mCardUUIDs, true, false);
+        adapter = new CardListRecyclerViewAdapter(this, mCardNames, mCardUUIDs, true, false);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -130,5 +132,29 @@ public class ViewDeckCardsActivity extends AppCompatActivity {
         mCardUUIDs = new ArrayList<>();
         mCardNames = new ArrayList<>();
         initImagesLists();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_menu, menu);
+        MenuItem item = menu.findItem(R.id.search_bar);
+        SearchView searchView = (SearchView) item.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                adapter.getFilter().filter(s);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                adapter.getFilter().filter(s);
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu);
+        return true;
     }
 }

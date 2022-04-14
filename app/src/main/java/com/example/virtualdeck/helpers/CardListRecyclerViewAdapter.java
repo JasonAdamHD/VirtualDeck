@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,11 +41,13 @@ import java.util.ConcurrentModificationException;
 
 import retrofit2.HttpException;
 
-public class CardListRecyclerViewAdapter extends RecyclerView.Adapter<CardListRecyclerViewAdapter.ViewHolder> {
+public class CardListRecyclerViewAdapter extends RecyclerView.Adapter<CardListRecyclerViewAdapter.ViewHolder> implements Filterable {
 
     private static final int ACTION_OPEN_DOCUMENT_CODE = 103;
     private ArrayList<String> mCardNames;
     private ArrayList<String> mCardUUIDs;
+    private ArrayList<String> mCardNamesAll;
+    private ArrayList<String> mCardUUIDsAll;
     private Context mContext;
     private boolean mIsLocal;
     private boolean mCanEditCards;
@@ -54,6 +58,8 @@ public class CardListRecyclerViewAdapter extends RecyclerView.Adapter<CardListRe
         this.mCardUUIDs = mCardUUIDs;
         this.mIsLocal = mIsLocal;
         this.mCanEditCards = mCanEditCards;
+        this.mCardNamesAll = new ArrayList<>(mCardNames);
+        this.mCardUUIDsAll = new ArrayList<>(mCardUUIDs);
     }
 
     @NonNull
@@ -139,6 +145,50 @@ public class CardListRecyclerViewAdapter extends RecyclerView.Adapter<CardListRe
     public int getItemCount() {
         return mCardNames.size();
     }
+
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
+
+    Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            ArrayList<ArrayList<String>> filteredList = new ArrayList<>();
+            ArrayList<String> names = new ArrayList<>();
+            ArrayList<String> cards = new ArrayList<>();
+            filteredList.add(names);
+            filteredList.add(cards);
+
+            if (charSequence.toString().isEmpty()){
+                filteredList.get(0).addAll(mCardNamesAll);
+                filteredList.get(1).addAll(mCardUUIDsAll);
+
+            }
+            else {
+                for (int i = 0; i < mCardNamesAll.size(); i++){
+                    if(mCardNamesAll.get(i).toLowerCase().contains(charSequence.toString().toLowerCase())){
+                        filteredList.get(0).add(mCardNamesAll.get(i));
+                        filteredList.get(1).add(mCardUUIDsAll.get(i));
+                    }
+                }
+            }
+
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filteredList;
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            mCardNames.clear();
+            mCardUUIDs.clear();
+            ArrayList<ArrayList<String>> tempList = (ArrayList<ArrayList<String>>) filterResults.values;
+            mCardNames.addAll(tempList.get(0));
+            mCardUUIDs.addAll(tempList.get(1));
+            notifyDataSetChanged();
+        }
+    };
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 

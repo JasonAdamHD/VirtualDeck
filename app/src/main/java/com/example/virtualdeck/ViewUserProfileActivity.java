@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
@@ -78,7 +79,6 @@ public class ViewUserProfileActivity extends AppCompatActivity {
     private void getProfile(String UserUUID)
     {
         OkHttpClient okHttpClient = new OkHttpClient();
-
         HttpUrl.Builder httpBuilder = HttpUrl.parse(GlobalConstants.GET_USERUUID_URL).newBuilder();
         httpBuilder.addQueryParameter("UserUUID", UserUUID);
         Request request = new Request.Builder().url(httpBuilder.build()).get().build();
@@ -108,6 +108,31 @@ public class ViewUserProfileActivity extends AppCompatActivity {
         });
     }
 
+    private void getUserProfile(String UserUUID)
+    {
+        // Build a request
+        OkHttpClient okHttpClient = new OkHttpClient();
+        HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse(GlobalConstants.GET_USERUUID_URL)).newBuilder();
+        httpBuilder.addQueryParameter("UserUUID", UserUUID);
+        Request request = new Request.Builder().url(httpBuilder.build()).get().build();
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                call.cancel();
+            }
+            // Wait for a response from the server
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                ViewUserProfileActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Do some stuff
+                    }
+                });
+            }
+        });
+    }
+
     private class UserProfile {
         String DisplayName;
         String PhotoURL;
@@ -115,3 +140,4 @@ public class ViewUserProfileActivity extends AppCompatActivity {
         String Username;
     }
 }
+

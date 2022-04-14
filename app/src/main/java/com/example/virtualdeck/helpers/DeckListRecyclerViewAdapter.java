@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,10 +26,12 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
-public class DeckListRecyclerViewAdapter extends RecyclerView.Adapter<DeckListRecyclerViewAdapter.ViewHolder>{
+public class DeckListRecyclerViewAdapter extends RecyclerView.Adapter<DeckListRecyclerViewAdapter.ViewHolder> implements Filterable {
 
     private ArrayList<String> mDeckNames;
     private ArrayList<String> mDeckUUIDs;
+    private ArrayList<String> mDeckNamesAll = new ArrayList<>();
+    private ArrayList<String> mDeckUUIDsAll = new ArrayList<>();
     private Context mContext;
     private boolean mIsLocal;
 
@@ -36,6 +40,8 @@ public class DeckListRecyclerViewAdapter extends RecyclerView.Adapter<DeckListRe
         this.mDeckNames = mDeckNames;
         this.mDeckUUIDs = mDeckUUIDs;
         this.mIsLocal = mIsLocal;
+        this.mDeckNamesAll.addAll(mDeckNames);
+        this.mDeckUUIDsAll.addAll(mDeckUUIDs);
     }
 
     @NonNull
@@ -65,6 +71,50 @@ public class DeckListRecyclerViewAdapter extends RecyclerView.Adapter<DeckListRe
         intent.putExtra("DeckName", deckName.getText().toString());
         mContext.startActivity(intent);
     }
+
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
+
+    Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            ArrayList<ArrayList<String>> filteredList = new ArrayList<>();
+            ArrayList<String> names = new ArrayList<>();
+            ArrayList<String> cards = new ArrayList<>();
+            filteredList.add(names);
+            filteredList.add(cards);
+
+            if (charSequence.toString().isEmpty()){
+                filteredList.get(0).addAll(mDeckNamesAll);
+                filteredList.get(1).addAll(mDeckUUIDsAll);
+
+            }
+            else {
+                for (int i = 0; i < mDeckNamesAll.size(); i++){
+                    if(mDeckNamesAll.get(i).toLowerCase().contains(charSequence.toString().toLowerCase())){
+                        filteredList.get(0).add(mDeckNamesAll.get(i));
+                        filteredList.get(1).add(mDeckUUIDsAll.get(i));
+                    }
+                }
+            }
+
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filteredList;
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            mDeckNames.clear();
+            mDeckUUIDs.clear();
+            ArrayList<ArrayList<String>> tempList = (ArrayList<ArrayList<String>>) filterResults.values;
+            mDeckNames.addAll(tempList.get(0));
+            mDeckUUIDs.addAll(tempList.get(1));
+            notifyDataSetChanged();
+        }
+    };
 
     @Override
     public int getItemCount() {

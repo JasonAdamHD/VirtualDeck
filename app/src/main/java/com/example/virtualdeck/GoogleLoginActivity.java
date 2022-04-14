@@ -40,6 +40,8 @@ public class GoogleLoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 0;
     GoogleSignInClient mGoogleSignInClient;
     SignInButton signInButton;
+    private static final String REQUEST_ID_TOKEN = "1067103079036-ck4drvi56akfibt4n32rl2b314k037vg.apps.googleusercontent.com";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +52,7 @@ public class GoogleLoginActivity extends AppCompatActivity {
         signInButton.setOnClickListener(this::onClick);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                // TODO: MAKE THIS AN ENV VAR
-                .requestIdToken("1067103079036-ck4drvi56akfibt4n32rl2b314k037vg.apps.googleusercontent.com")
+                .requestIdToken(REQUEST_ID_TOKEN)
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -131,45 +132,4 @@ public class GoogleLoginActivity extends AppCompatActivity {
             Log.w("Error", "signInResult:failed code=" + e.getStatusCode());
         }
     }
-
-    /*
-    @Override
-    protected void onStart() {
-        super.onStart();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        // Do auth check here?
-        //send the IdToken to the server
-        // if null then the user isn't logged in, otherwise they are logged in so just return
-        if(account == null) {
-            finish();
-        }
-        else{
-            try {
-                OkHttpClient okHttpClient = new OkHttpClient();
-
-                FormBody formBody = new FormBody.Builder()
-                        .add("token", account.getIdToken())
-                        .build();
-
-                Request request = new Request.Builder().url(GlobalConstants.AUTH_TOKEN).post(formBody).build();
-                okHttpClient.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if(response.isSuccessful()){
-                            response.body().toString();
-                        }
-                    }
-                });
-                Toast.makeText(this, "Uploading Card", Toast.LENGTH_SHORT).show();
-
-            } catch (Exception exception) {
-                Toast.makeText(this, exception.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }*/
 }

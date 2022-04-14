@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -13,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -38,7 +42,7 @@ public class CardsFragment extends Fragment {
 
     private CardsViewModel CardsViewModel;
     private FragmentCardsBinding binding;
-
+    private CardListRecyclerViewAdapter adapter;
     private ArrayList<String> mCardUUIDs = new ArrayList<>();
     private ArrayList<String> mCardNames = new ArrayList<>();
 
@@ -70,7 +74,7 @@ public class CardsFragment extends Fragment {
 
     private void initRecyclerView() {
         RecyclerView recyclerView = binding.getRoot().findViewById(R.id.card_list_recycler_view);
-        CardListRecyclerViewAdapter adapter = new CardListRecyclerViewAdapter(getContext(), mCardNames, mCardUUIDs, true, true);
+        adapter = new CardListRecyclerViewAdapter(getContext(), mCardNames, mCardUUIDs, true, true);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
@@ -97,4 +101,31 @@ public class CardsFragment extends Fragment {
         initImagesLists();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.search_menu, menu);
+        MenuItem item = menu.findItem(R.id.search_bar);
+        SearchView searchView = (SearchView) item.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                adapter.getFilter().filter(s);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                adapter.getFilter().filter(s);
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 }

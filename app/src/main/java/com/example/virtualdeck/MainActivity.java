@@ -38,10 +38,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Check if the user is logged in
-        /*
-
-        */
         databaseHelper = new SQLiteDatabaseHelper(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -57,10 +53,10 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+
         GlobalConstants.TOKEN = getSharedPreferences(GlobalConstants.SHARED_PREFS, MODE_PRIVATE).getString("TOKEN", "");
         GlobalConstants.USERUUID = getSharedPreferences(GlobalConstants.SHARED_PREFS, MODE_PRIVATE).getString("USERUUID", "");
 
-        // TODO asoidnasoidnoasindoiasndoiansodinasoid
         String tempListStr = getSharedPreferences(GlobalConstants.SHARED_PREFS, MODE_PRIVATE).getString("FRIENDSLISTJSON", "");
         Gson g = new Gson();
         ArrayList<String> result = g.fromJson(tempListStr, ArrayList.class);
